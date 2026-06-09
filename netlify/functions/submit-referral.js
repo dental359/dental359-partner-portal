@@ -75,7 +75,6 @@ const dealName = `${firstName || ''}${lastName ? ' ' + lastName : ''} — ${trea
         dealstage:          HS_STAGE_ID,
         amount:             String(treatment.value),
         deal_currency_code: 'AUD',
-        lead_source:        'Partner Referral',
         description: [
           `Treatment: ${treatment.label}`,
           `Partner: ${partnerName || ''} (${partnerBusiness || ''})`,
