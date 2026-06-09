@@ -40,7 +40,6 @@ exports.handler = async (event) => {
   };
 
   try {
-    // 1. Create Contact
     let contactId = null;
     const contactRes = await fetch('https://api.hubapi.com/crm/v3/objects/contacts', {
       method: 'POST',
@@ -67,9 +66,3 @@ exports.handler = async (event) => {
       const err = await contactRes.json();
       console.error('Contact error:', JSON.stringify(err));
     }
-
-    // 2. Create Deal
-    const dealName = `${firstName || ''}${lastName ? ' ' + lastName : ''} — ${treatment.label} (Partner Referral)`;
-
-    const dealPayload = {
-      p
