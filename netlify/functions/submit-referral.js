@@ -66,7 +66,8 @@ exports.handler = async (event) => {
       const err = await contactRes.json();
       console.error('Contact error:', JSON.stringify(err));
     }
-const dealName = `${firstName || ''}${lastName ? ' ' + lastName : ''} — ${treatment.label} (Partner Referral)`;
+
+    const dealName = `${firstName || ''}${lastName ? ' ' + lastName : ''} — ${treatment.label} (Partner Referral)`;
 
     const dealPayload = {
       properties: {
@@ -75,11 +76,21 @@ const dealName = `${firstName || ''}${lastName ? ' ' + lastName : ''} — ${trea
         dealstage:          HS_STAGE_ID,
         amount:             String(treatment.value),
         deal_currency_code: 'AUD',
+        referring_partner:  partnerName     || '',
+        referring_business: partnerBusiness || '',
+        commission_amount:  commission,
         description: [
+          `PARTNER REFERRAL`,
+          `━━━━━━━━━━━━━━━━━━━━━━━━`,
+          `Referring Partner: ${partnerName || ''}`,
+          `Referring Business: ${partnerBusiness || ''}`,
+          `━━━━━━━━━━━━━━━━━━━━━━━━`,
           `Treatment: ${treatment.label}`,
-          `Partner: ${partnerName || ''} (${partnerBusiness || ''})`,
-          `Contact preference: ${contactMethod || ''}`,
-          `Best time to contact: ${contactTime || ''}`,
+          `Treatment Value: $${treatment.value.toLocaleString()}`,
+          `Commission (10%): $${commission}`,
+          `━━━━━━━━━━━━━━━━━━━━━━━━`,
+          `Contact Preference: ${contactMethod || ''}`,
+          `Best Time: ${contactTime || ''}`,
           notes ? `Notes: ${notes}` : ''
         ].filter(Boolean).join('\n')
       }
