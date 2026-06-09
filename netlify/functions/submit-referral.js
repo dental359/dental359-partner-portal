@@ -66,3 +66,61 @@ exports.handler = async (event) => {
       const err = await contactRes.json();
       console.error('Contact error:', JSON.stringify(err));
     }
+const dealName = `${firstName || ''}${lastName ? ' ' + lastName : ''} — ${treatment.label} (Partner Referral)`;
+
+    const dealPayload = {
+      properties: {
+        dealname:           dealName,
+        pipeline:           HS_PIPELINE_ID,
+        dealstage:          HS_STAGE_ID,
+        amount:             String(treatment.value),
+        deal_currency_code: 'AUD',
+        lead_source:        'Partner Referral',
+        description: [
+          `Treatment: ${treatment.label}`,
+          `Partner: ${partnerName || ''} (${partnerBusiness || ''})`,
+          `Contact preference: ${contactMethod || ''}`,
+          `Best time to contact: ${contactTime || ''}`,
+          notes ? `Notes: ${notes}` : ''
+        ].filter(Boolean).join('\n')
+      }
+    };
+
+    if (contactId) {
+      dealPayload.associations = [{
+        to: { id: contactId },
+        types: [{ associationCategory: 'HUBSPOT_DEFINED', associationTypeId: 3 }]
+      }];
+    }
+
+    const dealRes = await fetch('https://api.hubapi.com/crm/v3/objects/deals', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(dealPayload)
+    });
+
+    if (!dealRes.ok) {
+      const dealErr = await dealRes.json();
+      console.error('Deal error:', JSON.stringify(dealErr));
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: 'Deal creation failed', detail: dealErr })
+      };
+    }
+
+    const dealData = await dealRes.json();
+    console.log('Success — Deal ID:', dealData.id, 'Contact ID:', contactId);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ success: true, dealId: dealData.id, contactId })
+    };
+
+  } catch (err) {
+    console.error('Function error:', err.message);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message })
+    };
+  }
+};
